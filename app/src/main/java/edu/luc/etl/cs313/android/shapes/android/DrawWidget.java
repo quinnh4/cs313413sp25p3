@@ -27,7 +27,7 @@ public class DrawWidget extends View {
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
     }
     
-    // TODO once BoundingBox and Draw are implemented, change Fixtures.simpleCircle
+    // once BoundingBox and Draw were implemented, changed Fixtures.simpleCircle
     // to Fixtures.complexGroup and test the app on an emulator or Android device
     // to make sure the correct figure is drawn (see Project 3 description for link)
 
