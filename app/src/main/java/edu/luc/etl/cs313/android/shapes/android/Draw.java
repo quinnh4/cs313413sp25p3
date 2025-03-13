@@ -10,17 +10,13 @@ import edu.luc.etl.cs313.android.shapes.model.*;
  */
 public class Draw implements Visitor<Void> {
 
-    // TODO entirely your job (except onCircle)
-
     private final Canvas canvas;
-
     private final Paint paint;
-
     private final Paint ogPaint;
 
     public Draw(final Canvas canvas, final Paint paint) {
-        this.canvas = canvas; // FIXED
-        this.paint = paint; // FIXED
+        this.canvas = canvas;
+        this.paint = paint;
         this.ogPaint = new Paint(paint);
         paint.setStyle(Style.STROKE);
     }
@@ -43,7 +39,7 @@ public class Draw implements Visitor<Void> {
     @Override
     public Void onFill(final Fill f) {
         final Style oldStyle = paint.getStyle();
-        paint.setStyle(Style.FILL);
+        paint.setStyle(Style.FILL_AND_STROKE);
         f.getShape().accept(this);
         paint.setStyle(oldStyle);
         return null;
@@ -59,33 +55,38 @@ public class Draw implements Visitor<Void> {
 
     @Override
     public Void onLocation(final Location l) {
-        canvas.save();
-        canvas.translate(l.getX(), l.getY());
+        final int x = l.getX();
+        final int y = l.getY();
+        canvas.translate(x, y);
         l.getShape().accept(this);
-        canvas.restore();
+        canvas.translate(-x, -y);
         return null;
     }
 
     @Override
     public Void onRectangle(final Rectangle r) {
-        final int halfWidth = r.getWidth() / 2;
-        final int halfHeight = r.getHeight() / 2;
-        canvas.drawRect(-halfWidth, -halfHeight, halfWidth, halfHeight, paint);
+        canvas.drawRect(0, 0, r.getWidth(), r.getHeight(), paint);
         return null;
     }
 
     @Override
-    public Void onOutline(Outline o) {
+    public Void onOutline(final Outline o) {
+        final Style oldStyle = paint.getStyle();
+        paint.setStyle(Style.STROKE);
         o.getShape().accept(this);
+        paint.setStyle(oldStyle);
         return null;
     }
 
     @Override
     public Void onPolygon(final Polygon s) {
+        int numPoints = s.getPoints().size();
+        if (numPoints < 2) return null;
 
-        final float[] pts = new float[(s.getPoints().size() * 4) - 2];
+        float[] pts = new float[numPoints * 4];
         int index = 0;
-        for (int i = 0; i < s.getPoints().size() - 1; i++) {
+
+        for (int i = 0; i < numPoints - 1; i++) {
             Point p1 = s.getPoints().get(i);
             Point p2 = s.getPoints().get(i + 1);
             pts[index++] = p1.getX();
@@ -93,12 +94,15 @@ public class Draw implements Visitor<Void> {
             pts[index++] = p2.getX();
             pts[index++] = p2.getY();
         }
-        Point first = s.getPoints().get(0);
-        Point last = s.getPoints().get(s.getPoints().size() - 1);
-        pts[index++] = last.getX();
-        pts[index++] = last.getY();
-        pts[index++] = first.getX();
-        pts[index++] = first.getY();
+
+        if (numPoints > 1) {
+            Point first = s.getPoints().get(0);
+            Point last = s.getPoints().get(numPoints - 1);
+            pts[index++] = last.getX();
+            pts[index++] = last.getY();
+            pts[index++] = first.getX();
+            pts[index++] = first.getY();
+        }
 
         canvas.drawLines(pts, paint);
         return null;
