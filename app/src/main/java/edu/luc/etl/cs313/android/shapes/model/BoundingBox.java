@@ -61,7 +61,10 @@ public class BoundingBox implements Visitor<Location> {
     public Location onRectangle(final Rectangle r) {
         final int halfWidth = r.getWidth() / 2;
         final int halfHeight = r.getHeight() / 2;
-        return new Location(-halfWidth, -halfHeight, new Rectangle(r.getWidth(), r.getHeight()));
+        //update: i changed the x and y values to 0. The test expects it to be in location 0/0. IDK if
+        //impacts other tests as well. I'll keep testing.
+        return new Location(0, 0, new Rectangle(r.getWidth(), r.getHeight()));
+        //return new Location(-halfWidth, -halfHeight, new Rectangle(r.getWidth(), r.getHeight()));
     }
 
     @Override

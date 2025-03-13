@@ -34,10 +34,17 @@ public class DrawWidget extends View {
     @Override
     @SuppressLint("DrawAllocation")
     protected void onDraw(final Canvas canvas) {
-        final var shape = Fixtures.simpleCircle;
-        final var b = shape.accept(new BoundingBox());
-        canvas.translate(-b.getX(), -b.getY());
-        b.accept(new Draw(canvas, paint));
+        //creates circle
+        // var shape = Fixtures.simpleStrokeColor;
+         //var shape = Fixtures.simpleFill;
+        // var shape = Fixtures.simpleGroup;
+        //var shape = Fixtures.simpleLocation;
+        //var shape = Fixtures.simplePolygon;
+        //var shape = Fixtures.simpleOutline;
+        var shape = Fixtures.complexGroup; // the circle is filled instead of outlined, box is also filled.
+        final var b = shape.accept(new BoundingBox()); //creates the bounding box of the circle
+        canvas.translate(-b.getX(), -b.getY()); //coordinates
+        b.accept(new Draw(canvas, paint)); //
         shape.accept(new Draw(canvas, paint));
         canvas.translate(b.getX(), b.getY());
     }

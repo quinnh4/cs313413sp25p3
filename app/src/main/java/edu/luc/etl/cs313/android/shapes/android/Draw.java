@@ -4,7 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import edu.luc.etl.cs313.android.shapes.model.*;
-
+import java.util.List;
 /**
  * A Visitor for drawing a shape to an Android canvas.
  */
@@ -62,7 +62,9 @@ public class Draw implements Visitor<Void> {
         canvas.save();
         canvas.translate(l.getX(), l.getY());
         l.getShape().accept(this);
-        canvas.restore();
+        //canvas.restore();
+        canvas.translate(-l.getX(), -l.getY());//to restore it, try and flip the coordinates instead of using restore. This fixed the
+        //simple location test
         return null;
     }
 
@@ -70,35 +72,46 @@ public class Draw implements Visitor<Void> {
     public Void onRectangle(final Rectangle r) {
         final int halfWidth = r.getWidth() / 2;
         final int halfHeight = r.getHeight() / 2;
-        canvas.drawRect(-halfWidth, -halfHeight, halfWidth, halfHeight, paint);
+        //i changed x and y to 0. It makes a more clear rectangle,becuase the previous code placed the
+        // rectangle outside the screen. It also passes the tests, not sure haha. I also removed the half stuff.
+        canvas.drawRect(0, 0, r.getWidth(), r.getHeight(), paint);
         return null;
     }
 
     @Override
     public Void onOutline(Outline o) {
+        final Paint.Style originalStyle = paint.getStyle();
+
+        paint.setStyle(Paint.Style.STROKE);
+
+
         o.getShape().accept(this);
+
+
+        paint.setStyle(originalStyle);
+
         return null;
     }
 
     @Override
     public Void onPolygon(final Polygon s) {
 
-        final float[] pts = new float[(s.getPoints().size() * 4) - 2];
+        final List<? extends Point> points = s.getPoints();
+        final int numPoints = points.size();
+
+
+        final float[] pts = new float[numPoints * 4];
+
         int index = 0;
-        for (int i = 0; i < s.getPoints().size() - 1; i++) {
-            Point p1 = s.getPoints().get(i);
-            Point p2 = s.getPoints().get(i + 1);
+        for (int i = 0; i < numPoints; i++) {
+            Point p1 = points.get(i);
+            Point p2 = points.get((i + 1) % numPoints);
+
             pts[index++] = p1.getX();
             pts[index++] = p1.getY();
             pts[index++] = p2.getX();
             pts[index++] = p2.getY();
         }
-        Point first = s.getPoints().get(0);
-        Point last = s.getPoints().get(s.getPoints().size() - 1);
-        pts[index++] = last.getX();
-        pts[index++] = last.getY();
-        pts[index++] = first.getX();
-        pts[index++] = first.getY();
 
         canvas.drawLines(pts, paint);
         return null;
